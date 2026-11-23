@@ -32,14 +32,16 @@ public class OverlayService extends Service {
         engineWebView = new WebView(this);
         engineWebView.getSettings().setJavaScriptEnabled(true);
         engineWebView.addJavascriptInterface(new Object() {
-            @JavascriptInterface
-            public void showMove(final String move) {
-                // Когда движок нашел ход, показываем его в окошке
-                ((android.app.Activity) getApplicationContext()).runOnUiThread(() -> {
-                    if (resultText != null) resultText.setText("Ход: " + move);
-                });
+    @JavascriptInterface
+    public void showMove(final String move) {
+        // Правильный способ обновить интерфейс из фонового потока
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+            if (resultText != null) {
+                resultText.setText("Ход: " + move);
             }
-        }, "AndroidBridge");
+        });
+    }
+}, "AndroidBridge");
 
         // Загружаем движок из интернета
         String html = "<html><body><script src='https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js'></script>" +
